@@ -188,7 +188,7 @@ const CONFIG = {
   BANK: "국민은행",               // 은행 이름
   ACCOUNT: "958802-01-242195",    // 계좌번호 (복사되는 값)
   HOLDER: "노예진",                // 예금주
-  GOAL: 150000,                    // 목표 금액(원). 0이면 진행률 막대를 숨깁니다.
+  GOAL: 165000,                    // 목표 금액(원). 0이면 진행률 막대를 숨깁니다.
   AMOUNTS: [5000, 10000, 20000, 30000],
   // Firebase Realtime Database URL (끝에 / 없이). 비워두면 이 브라우저에만 저장됩니다.
   FIREBASE_URL: "https://bass-amp-fund-default-rtdb.asia-southeast1.firebasedatabase.app" // 예: "https://my-fund-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -334,7 +334,7 @@ const BANK_APPS = [
 function openBankApp(name, scheme) {
   // 앱이 열리면 페이지가 숨겨지므로, 1.8초 뒤에도 보이면 실패로 보고 안내합니다.
   const timer = setTimeout(() => {
-    if (!document.hidden) toast(`${name} 앱을 열지 못했어요`);
+    if (!document.hidden) toast(`${name} 앱이 설치되어 있지 않습니다.`);
   }, 1800);
   document.addEventListener("visibilitychange", () => { if (document.hidden) clearTimeout(timer); }, { once: true });
   window.location.href = scheme;
