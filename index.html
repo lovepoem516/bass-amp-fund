@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모드기어 앰프 모금함</title>
+<meta name="description" content="모드기어 베이스 앰프 구매를 위한 친구들 모금 페이지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #141210;
+    --panel: #1f1c19;
+    --line: #3a342d;
+    --text: #f3ece0;
+    --muted: #a69c8c;
+    --gold: #c9a45c;
+    --gold-dark: #9c7c3c;
+    --ok: #7fbf7f;
+    --danger: #d9776b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 6px);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px 48px;
+  }
+  .wrap { width: 100%; max-width: 460px; }
+  header { text-align: center; margin-bottom: 28px; }
+  .eyebrow { color: var(--gold); letter-spacing: 0.3em; font-size: 12px; font-weight: 700; }
+  h1 { font-size: 28px; font-weight: 900; margin: 10px 0 8px; line-height: 1.3; }
+  .sub { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 18px;
+  }
+  .total-label { color: var(--muted); font-size: 13px; }
+  .pct-big { font-size: 72px; font-weight: 900; color: var(--gold); line-height: 1; margin: 8px 0 4px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .pct-big small { font-size: 32px; margin-left: 4px; }
+  .total { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .count { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .bar { height: 14px; background: #2c2824; border-radius: 99px; overflow: hidden; margin-top: 16px; }
+  .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); transition: width .6s ease; }
+  .goal-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .goal-row > span { white-space: nowrap; }
+
+  .section-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .amt {
+    font-family: inherit;
+    font-size: 18px; font-weight: 700;
+    color: var(--text);
+    background: #2a2622;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 8px;
+    cursor: pointer;
+    transition: transform .1s, border-color .2s, background .2s;
+  }
+  .amt:hover { border-color: var(--gold); background: #332e28; }
+  .amt:active { transform: scale(0.97); }
+
+  .account { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; }
+  .account b { color: var(--gold); }
+  .small-btn {
+    font-family: inherit; font-size: 13px;
+    background: transparent; color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 6px 10px; cursor: pointer; white-space: nowrap;
+  }
+  .notice { font-size: 12px; color: var(--danger); margin-top: 10px; line-height: 1.5; }
+
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+    display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--gold-dark);
+    border-radius: 16px; padding: 26px 22px; width: 100%; max-width: 360px; text-align: center;
+  }
+  .modal h2 { font-size: 20px; margin-bottom: 10px; }
+  .modal p { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 6px; }
+  .modal .acct-box {
+    background: #2a2622; border-radius: 10px; padding: 12px; margin: 14px 0 18px;
+    font-size: 15px; word-break: keep-all; user-select: all;
+  }
+  .modal .q { color: var(--text); font-weight: 700; margin: 4px 0 2px; }
+  .modal .hint { font-size: 12px; color: var(--gold); margin-bottom: 14px; }
+  .modal { max-height: 92vh; overflow-y: auto; }
+  .modal .bank-label { font-size: 13px; color: var(--text); font-weight: 700; text-align: left; margin-bottom: 8px; }
+  .banks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 20px; }
+  .bank { font-family: inherit; font-size: 13px; color: var(--text); background: #2a2622; border: 1px solid var(--line); border-radius: 8px; padding: 10px 4px; cursor: pointer; }
+  .bank:hover { border-color: var(--gold); }
+  .bank:active { transform: scale(0.97); }
+  .modal-btns { display: flex; gap: 10px; }
+  .modal-btns button {
+    flex: 1; font-family: inherit; font-size: 16px; font-weight: 700;
+    padding: 14px; border-radius: 10px; cursor: pointer; border: none;
+  }
+  .yes { background: var(--gold); color: #1a1714; }
+  .no { background: #2f2a25; color: var(--text); border: 1px solid var(--line) !important; }
+  .yes:disabled { opacity: .5; cursor: wait; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+    background: #2a2622; border: 1px solid var(--gold-dark); color: var(--text);
+    padding: 12px 18px; border-radius: 99px; font-size: 14px;
+    opacity: 0; transition: all .3s; pointer-events: none; z-index: 20; max-width: calc(100% - 32px); text-align: center; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .log { list-style: none; max-height: 220px; overflow-y: auto; }
+  .log li { display: flex; justify-content: space-between; font-size: 13px; padding: 9px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .log li b { color: var(--text); }
+  .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 8px 0; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; line-height: 1.6; margin-top: 24px; word-break: keep-all; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">FRIENDS FUND</div>
+    <h1>모드기어 베이스 앰프<br>함께 사요</h1>
+    <p class="sub">금액 버튼을 누르면 계좌번호가 복사됩니다.<br>송금 완료 후 '예' 버튼을 누르면 %에 반영됩니다.</p>
+  </header>
+
+  <section class="card">
+    <div class="total-label">목표 달성률</div>
+    <div class="pct-big"><span id="percent">0</span><small>%</small></div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="goal-row"><span>현재 총 후원 금액 <span class="total" id="total">0원</span></span><span id="goalText"></span></div>
+    <div class="count" id="count">아직 후원이 없어요</div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">후원 금액 선택</div>
+    <div class="grid" id="amountGrid"></div>
+  </section>
+
+  <section class="card">
+    <div class="account">
+      <span id="accountText"></span>
+      <button class="small-btn" id="copyOnly">복사</button>
+    </div>
+    <div class="notice" id="modeNotice" hidden></div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">후원 내역</div>
+    <ul class="log" id="log"></ul>
+  </section>
+
+  <footer>얘들아 정말 고맙고 멋진 연주실력 향상으로 보답할게</footer>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">계좌번호가 복사됐어요</h2>
+    <p id="modalAmount"></p>
+    <div class="acct-box" id="modalAccount"></div>
+    <p class="bank-label">은행 앱 바로 열기</p>
+    <div class="banks" id="bankGrid"></div>
+    <p class="q">송금을 완료하셨나요?</p>
+    <p class="hint">송금 완료 후 '예' 버튼을 누르면 %에 반영됩니다</p>
+    <div class="modal-btns">
+      <button class="no" id="noBtn">아니오</button>
+      <button class="yes" id="yesBtn">예</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================== 설정 (여기만 수정하세요) ================== */
+const CONFIG = {
+  BANK: "국민은행",               // 은행 이름
+  ACCOUNT: "958802-01-242195",    // 계좌번호 (복사되는 값)
+  HOLDER: "노예진",                // 예금주
+  GOAL: 150000,                    // 목표 금액(원). 0이면 진행률 막대를 숨깁니다.
+  AMOUNTS: [5000, 10000, 20000, 30000],
+  // Firebase Realtime Database URL (끝에 / 없이). 비워두면 이 브라우저에만 저장됩니다.
+  FIREBASE_URL: "https://bass-amp-fund-default-rtdb.asia-southeast1.firebasedatabase.app" // 예: "https://my-fund-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+/* ============================================================== */
+
+const won = n => n.toLocaleString("ko-KR") + "원";
+const $ = id => document.getElementById(id);
+const LOCAL_KEY = "speaker-fund-donations";
+const useRemote = !!CONFIG.FIREBASE_URL;
+let selected = 0;
+
+/* ---------- 저장소 ---------- */
+async function loadDonations() {
+  if (useRemote) {
+    const res = await fetch(`${CONFIG.FIREBASE_URL}/donations.json`, { cache: "no-store" });
+    if (!res.ok) throw new Error("불러오기 실패");
+    const data = await res.json();
+    return data ? Object.values(data) : [];
+  }
+  try { return JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; }
+  catch { return []; }
+}
+
+async function addDonation(amount) {
+  const entry = { amount, at: Date.now() };
+  if (useRemote) {
+    // 각 후원을 개별 항목으로 추가(push)하므로 동시에 눌러도 금액이 덮어써지지 않습니다.
+    const res = await fetch(`${CONFIG.FIREBASE_URL}/donations.json`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    });
+    if (!res.ok) throw new Error("저장 실패");
+    return;
+  }
+  const list = await loadDonations();
+  list.push(entry);
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(list)); } catch {}
+}
+
+/* ---------- 클립보드 (카카오톡 인앱 브라우저 대비 폴백 포함) ---------- */
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {}
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch { return false; }
+}
+
+/* ---------- 화면 ---------- */
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function render(list) {
+  const total = list.reduce((s, d) => s + (Number(d.amount) || 0), 0);
+  $("total").textContent = won(total);
+  $("count").textContent = list.length ? `${list.length}번의 후원이 모였어요` : "아직 후원이 없어요";
+
+  if (CONFIG.GOAL > 0) {
+    const pct = Math.min(100, Math.round(total / CONFIG.GOAL * 100));
+    $("bar").style.width = pct + "%";
+    $("percent").textContent = pct;
+    const left = CONFIG.GOAL - total;
+    $("goalText").textContent = left > 0 ? `목표 ${won(CONFIG.GOAL)} · ${won(left)} 남음` : `목표 ${won(CONFIG.GOAL)} 달성! 🎉`;
+  } else {
+    document.querySelector(".bar").style.display = "none";
+    document.querySelector(".pct-big").style.display = "none";
+  }
+
+  const log = $("log");
+  log.innerHTML = "";
+  const recent = [...list].sort((a, b) => b.at - a.at).slice(0, 30);
+  if (!recent.length) {
+    log.innerHTML = '<li class="empty" style="border:none">첫 번째 후원자가 되어 주세요!</li>';
+    return;
+  }
+  for (const d of recent) {
+    const li = document.createElement("li");
+    const time = new Date(d.at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    li.innerHTML = `<span>${time}</span><b>${won(Number(d.amount) || 0)}</b>`;
+    log.appendChild(li);
+  }
+}
+
+async function refresh() {
+  try { render(await loadDonations()); }
+  catch { toast("후원 내역을 불러오지 못했어요"); }
+}
+
+function openModal(amount) {
+  selected = amount;
+  $("modalAmount").textContent = `${won(amount)} 후원을 선택하셨어요`;
+  $("modalAccount").textContent = `${CONFIG.BANK} ${CONFIG.ACCOUNT} (${CONFIG.HOLDER})`;
+  $("modalBg").classList.add("show");
+}
+function closeModal() {
+  $("modalBg").classList.remove("show");
+  selected = 0;
+}
+
+/* ---------- 초기화 ---------- */
+$("accountText").innerHTML = `${CONFIG.BANK} <b>${CONFIG.ACCOUNT}</b> · ${CONFIG.HOLDER}`;
+if (!useRemote) {
+  $("modeNotice").hidden = false;
+  $("modeNotice").textContent = "※ 테스트 모드: 후원 금액이 이 기기에만 저장됩니다. 친구들과 공유하려면 FIREBASE_URL을 설정하세요.";
+}
+
+/* ---------- 은행 앱 바로 열기 (URL 스킴) ---------- */
+const BANK_APPS = [
+  ["토스", "supertoss://"],
+  ["카카오뱅크", "kakaobank://"],
+  ["KB국민", "kbbank://"],
+  ["신한 SOL", "shinhansol://"],
+  ["우리WON", "wooribank://"],
+  ["하나원큐", "hanapush://"],
+  ["NH농협", "newnhsmartbanking://"],
+  ["NH올원뱅크", "nhallone://"],
+  ["IBK기업", "ionebank://"],
+  ["케이뱅크", "ukbanksmartbank://"],
+  ["iM뱅크", "mbanking://"]
+];
+
+function openBankApp(name, scheme) {
+  // 앱이 열리면 페이지가 숨겨지므로, 1.8초 뒤에도 보이면 실패로 보고 안내합니다.
+  const timer = setTimeout(() => {
+    if (!document.hidden) toast(`${name} 앱을 열지 못했어요`);
+  }, 1800);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) clearTimeout(timer); }, { once: true });
+  window.location.href = scheme;
+}
+
+const bankGrid = $("bankGrid");
+BANK_APPS.forEach(([name, scheme]) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "bank";
+  b.textContent = name;
+  b.addEventListener("click", () => openBankApp(name, scheme));
+  bankGrid.appendChild(b);
+});
+
+const grid = $("amountGrid");
+CONFIG.AMOUNTS.forEach(a => {
+  const b = document.createElement("button");
+  b.className = "amt";
+  b.textContent = won(a);
+  b.addEventListener("click", async () => {
+    const ok = await copyText(CONFIG.ACCOUNT);
+    $("modalTitle").textContent = ok ? "계좌번호가 복사됐어요" : "아래 계좌번호를 길게 눌러 복사해 주세요";
+    openModal(a);
+  });
+  grid.appendChild(b);
+});
+
+$("copyOnly").addEventListener("click", async () => {
+  toast(await copyText(CONFIG.ACCOUNT) ? "계좌번호가 복사됐어요" : "복사에 실패했어요. 직접 복사해 주세요");
+});
+
+$("noBtn").addEventListener("click", () => {
+  closeModal();
+  toast("송금 후 다시 눌러 주세요");
+});
+
+$("yesBtn").addEventListener("click", async () => {
+  if (!selected) return;
+  const amount = selected;
+  const btn = $("yesBtn");
+  btn.disabled = true;
+  try {
+    await addDonation(amount);
+    closeModal();
+    toast(`${won(amount)} 후원 감사합니다! 🎉`);
+    await refresh();
+  } catch {
+    toast("저장에 실패했어요. 잠시 후 다시 시도해 주세요");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("modalBg").addEventListener("click", e => { if (e.target.id === "modalBg") closeModal(); });
+
+refresh();
+if (useRemote) setInterval(refresh, 15000); // 다른 친구의 후원도 15초마다 반영
+</script>
+</body>
+</html>
